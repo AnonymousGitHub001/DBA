@@ -100,6 +100,8 @@ from typing import *
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassification
 from collections import namedtuple
 from torch.nn.utils.rnn import pad_sequence
+from .custom_bert import CustomBertModel, CustomOutput
+
 
 
 class PLMVictim(Victim):
@@ -116,6 +118,7 @@ class PLMVictim(Victim):
 
     def __init__(
             self,
+            # config,  # 新增 config 参数
             device: Optional[str] = "gpu",
             model: Optional[str] = "bert",
             path: Optional[str] = "bert-base-uncased",
@@ -124,15 +127,16 @@ class PLMVictim(Victim):
             **kwargs
     ):
         super().__init__()
-
+        # self.config = config  # 保存 config 参数
         self.device = torch.device("cuda" if torch.cuda.is_available() and device == "gpu" else "cpu")
         self.model_name = model
         self.model_config = AutoConfig.from_pretrained(path)
         self.model_config.num_labels = num_classes
         # you can change huggingface model_config here
-        self.plm = AutoModelForSequenceClassification.from_pretrained(path, config=self.model_config)
-        self.max_len = max_len
         self.tokenizer = AutoTokenizer.from_pretrained(path)
+        self.plm = CustomBertModel.from_pretrained(path, config=self.model_config, tokenizer=self.tokenizer)##### custom
+        # self.plm = AutoModelForSequenceClassification.from_pretrained(path, config=self.model_config)#### lwp
+        self.max_len = max_len
         self.to(self.device)
 
     def to(self, device):
@@ -141,6 +145,7 @@ class PLMVictim(Victim):
     def forward(self, inputs):
         output = self.plm(**inputs, output_hidden_states=True)
         return output
+
 
     def get_repr_embeddings(self, inputs):
         output = getattr(self.plm, self.model_name)(**inputs).last_hidden_state  # batch_size, max_len, 768(1024)
