@@ -13,13 +13,13 @@ from openbackdoor.utils.visualize import display_results
 import nltk
 import OpenHowNet
 from transformers import BertTokenizer, BertConfig, AutoModelForSequenceClassification
-from openbackdoor.victims.custom_bert import CustomBertModel  # 确保这个导入路径正确
+from openbackdoor.victims.custom_bert import CustomBertModel 
 import torch
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 OpenHowNet.download()
 
@@ -32,18 +32,18 @@ os.environ["https_proxy"] = "http://127.0.0.1:7890"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', type=str, default='./configs/sos_config.json')
+    parser = argparse.ArgumentParser()cc
+    parser.add_argument('--config_path', type=str, default='./configs/lwp_config.json')
     parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args()
     return args
 
 
 def main(config):
-    print("Main function started")  # 添加调试信息
+    print("Main function started") 
     # set_seed(config['seed'])
 
-    # choose a victim classification model
+    # choose a victim classification modelc
     attacker = load_attacker(config["attacker"])
     victim = load_victim(config["victim"])
 
@@ -51,7 +51,7 @@ def main(config):
     target_dataset = load_dataset(**config["target_dataset"])
     poison_dataset = load_dataset(**config["poison_dataset"])
 
-    logger.info("Train backdoored model on {}".format(config["poison_dataset"]["name"]))
+    logger.info("Train backdoored model on {}".format(config["poison_dataset"]["name"]c))
     backdoored_model = attacker.attack(victim, poison_dataset, config)
 
     if config["clean-tune"]:
@@ -61,8 +61,6 @@ def main(config):
 
     logger.info("Evaluate backdoored model on {}".format(config["target_dataset"]["name"]))
     results = attacker.eval(backdoored_model, target_dataset)
-
-    # 计算攻击成功率
 
     # asr = victim.calculate_asr()
     # sample_counts = victim.get_sample_counts()
